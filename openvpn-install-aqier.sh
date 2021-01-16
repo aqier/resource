@@ -270,7 +270,9 @@ LimitNPROC=infinity" > /etc/systemd/system/openvpn-server@server.service.d/disab
 		apt-get install -y openvpn openssl ca-certificates $firewall
 	elif [[ "$os" = "centos" ]]; then
 		yum install -y epel-release
+		echo && echo "install epel-release finished."
 		yum install -y openvpn openssl ca-certificates tar $firewall
+		echo && echo "install openvpn openssl ca-certificates finished."
 	else
 		# Else, OS must be Fedora
 		dnf install -y openvpn openssl ca-certificates tar $firewall
@@ -278,16 +280,19 @@ LimitNPROC=infinity" > /etc/systemd/system/openvpn-server@server.service.d/disab
 	# If firewalld was just installed, enable it
 	if [[ "$firewall" == "firewalld" ]]; then
 		systemctl enable --now firewalld.service
+		echo && echo "enable firewalld.service finished."
 	fi
 	# Get easy-rsa
 	easy_rsa_url='https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz'
 	mkdir -p /etc/openvpn/server/easy-rsa/
 	{ wget -qO- "$easy_rsa_url" 2>/dev/null || curl -sL "$easy_rsa_url" ; } | tar xz -C /etc/openvpn/server/easy-rsa/ --strip-components 1
+	echo && echo "tar xz -C /etc/openvpn/server/easy-rsa/ finished."
 	chown -R root:root /etc/openvpn/server/easy-rsa/
 	cd /etc/openvpn/server/easy-rsa/
 	# Create the PKI, set up the CA and the server and client certificates
 	./easyrsa init-pki
 	./easyrsa --batch build-ca nopass
+	echo && echo "easyrsa build-ca nopass finished."
 	EASYRSA_CERT_EXPIRE=3650 ./easyrsa build-server-full server nopass
 	EASYRSA_CERT_EXPIRE=3650 ./easyrsa build-client-full "$client" nopass
 	EASYRSA_CRL_DAYS=3650 ./easyrsa gen-crl
