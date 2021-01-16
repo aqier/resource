@@ -111,7 +111,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	else
 		number_of_ip=$(ip -4 addr | grep inet | grep -vEc '127(\.[0-9]{1,3}){3}')
 		
-		if [ "$ip" == "" ]; then # Aqier add
+		if [ "$bind_ip" == "" ]; then # Aqier add
 		
 		ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | nl -s ') '
 		read -p "IPv4 address [1]: " ip_number
@@ -122,7 +122,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		[[ -z "$ip_number" ]] && ip_number="1"
 		ip=$(ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | sed -n "$ip_number"p)
 		
-		else echo "$ip" ; fi # Aqier add
+		else ip=$bind_ip; echo "$ip" ; fi # Aqier add
 		
 	fi
 	
