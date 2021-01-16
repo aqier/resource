@@ -240,14 +240,6 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	
 	echo
 	echo "OpenVPN installation is ready to begin."
-	
-	# Get easy-rsa
-	easy_rsa_url='https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz'
-	mkdir -p /etc/openvpn/server/easy-rsa/
-	{ wget -qO- "$easy_rsa_url" 2>/dev/null || curl -sL "$easy_rsa_url" ; } | tar xz -C /etc/openvpn/server/easy-rsa/ --strip-components 1
-	echo && echo "tar xz -C /etc/openvpn/server/easy-rsa/ finished."
-	chown -R root:root /etc/openvpn/server/easy-rsa/
-	
 	# Install a firewall in the rare case where one is not already available
 	if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
 		if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
@@ -266,6 +258,13 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	read -n1 -r -p "Press any key to continue..."
 	
 	else echo "continue: $continue" ; fi # Aqier add
+	
+	# Get easy-rsa
+	easy_rsa_url='https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz'
+	mkdir -p /etc/openvpn/server/easy-rsa/
+	{ wget -qO- "$easy_rsa_url" 2>/dev/null || curl -sL "$easy_rsa_url" ; } | tar xz -C /etc/openvpn/server/easy-rsa/ --strip-components 1
+	echo && echo "tar xz -C /etc/openvpn/server/easy-rsa/ finished."
+	chown -R root:root /etc/openvpn/server/easy-rsa/
 	
 	# If running inside a container, disable LimitNPROC to prevent conflicts
 	if systemd-detect-virt -cq; then
