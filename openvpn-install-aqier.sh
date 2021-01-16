@@ -101,13 +101,15 @@ new_client () {
 if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	clear
 	echo 'Welcome to this OpenVPN road warrior installer!'
+	echo
+	echo "Which IPv4 address should be used?"
+	
 	# If system has a single IPv4, it is selected automatically. Else, ask the user	
 	if [[ $(ip -4 addr | grep inet | grep -vEc '127(\.[0-9]{1,3}){3}') -eq 1 ]]; then
 		ip=$(ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}')
+		echo "$ip"
 	else
 		number_of_ip=$(ip -4 addr | grep inet | grep -vEc '127(\.[0-9]{1,3}){3}')
-		echo
-		echo "Which IPv4 address should be used?"
 		
 		if [ "$ip" == "" ]; then # Aqier add
 		
@@ -310,20 +312,15 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
 	echo "local $ip
 port $port
 proto $protocol
-dev tun" > /etc/openvpn/server/server.conf
-
-if [ "$proxy" != "" ]; then # Add aqier
-    echo "http-proxy $proxy" >> /etc/openvpn/server/server.conf # Add aqier
-fi # Add aqier
-
-echo "ca ca.crt
+dev tun
+ca ca.crt
 cert server.crt
 key server.key
 dh dh.pem
 auth SHA512
 tls-crypt tc.key
 topology subnet
-server 10.8.0.0 255.255.255.0" >> /etc/openvpn/server/server.conf
+server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 	# IPv6
 	if [[ -z "$ip6" ]]; then
 		echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server/server.conf
@@ -463,8 +460,13 @@ WantedBy=multi-user.target" >> /etc/systemd/system/openvpn-iptables.service
 	echo "client
 dev tun
 proto $protocol
-remote $ip $port
-resolv-retry infinite
+remote $ip $port" > /etc/openvpn/server/client-common.txt
+
+if [ "$proxy" != "" ]; then # Add aqier
+    echo "http-proxy $proxy" >> /etc/openvpn/server/client-common.txt # Add aqier
+fi # Add aqier
+
+echo "resolv-retry infinite
 nobind
 persist-key
 persist-tun
@@ -473,7 +475,7 @@ auth SHA512
 cipher AES-256-CBC
 ignore-unknown-option block-outside-dns
 block-outside-dns
-verb 3" > /etc/openvpn/server/client-common.txt
+verb 3" >> /etc/openvpn/server/client-common.txt
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
 	# Generates the custom client.ovpn
